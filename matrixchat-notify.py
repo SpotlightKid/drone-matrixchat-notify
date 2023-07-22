@@ -10,12 +10,12 @@ Requires:
 
 import argparse
 import asyncio
-import logging
 import json
+import logging
 import os
 import sys
 from distutils.util import strtobool
-from os.path import exists, isdir, join
+from os.path import exists
 from string import Template
 
 from nio import AsyncClient, LoginResponse
@@ -24,7 +24,6 @@ PROG = "matrixchat-notify"
 CONFIG_FILENAME = f"{PROG}-config.json"
 DEFAULT_TEMPLATE = "${DRONE_BUILD_STATUS}"
 DEFAULT_HOMESERVER = "https://matrix.org"
-log = logging.getLogger(PROG)
 SETTINGS_KEYS = (
     "accesstoken",
     "deviceid",
@@ -36,6 +35,7 @@ SETTINGS_KEYS = (
     "template",
     "userid",
 )
+log = logging.getLogger(PROG)
 
 
 def tobool(s):
@@ -45,7 +45,7 @@ def tobool(s):
         return False
 
 
-def read_config_from_file(filename):
+def read_config_from_file_and_env(filename):
     config = {}
 
     if exists(filename):
@@ -148,7 +148,7 @@ def main(args=None):
     )
 
     try:
-        config = read_config_from_file(args.config)
+        config = read_config_from_file_and_env(args.config)
     except Exception as exc:
         return f"Could not parse configuration: {exc}"
 
