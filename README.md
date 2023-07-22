@@ -66,7 +66,7 @@ steps:
     The message template. Valid placeholders of the form `${PLACEHOLDER}` will
     be substituted with the values of the matching environment variables.
 
-    See this [reference] for environment variables available drone.io in CI
+    See this [reference] for environment variables available in drone.io CI
     pipelines.
 
 * `userid` *(required)*
