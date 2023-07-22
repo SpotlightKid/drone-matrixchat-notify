@@ -27,7 +27,7 @@ steps:
     template: '${DRONE_REPO} ${DRONE_COMMIT_SHA} ${DRONE_BUILD_STATUS}'
 ```
 
-# Configuration settings
+## Configuration settings
 
 * `accesstoken`
 
