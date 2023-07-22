@@ -1,0 +1,4 @@
+testconfig.json
+.env
+*.py[co]
+__pycache__/

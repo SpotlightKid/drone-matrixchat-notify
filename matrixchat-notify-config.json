@@ -1,0 +1,5 @@
+{
+    "homeserver": "https://matrix.org",
+    "template": "${DRONE_BUILD_STATUS}",
+    "markdown": "no"
+}
