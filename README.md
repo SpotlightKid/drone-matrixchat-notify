@@ -70,6 +70,9 @@ steps:
     substtution is considered to be in Markdown format and will be rendered to
     HTML and sent as a formatted message with `org.matrix.custom.html` format.
 
+    Using this feature requires the `markdown` and `bleach` Python modules to
+    be available (the plugin's docker image has them installed).
+
 * `markdown_extensions` *(default:* `admonition, extra, sane_lists, smarty`)
 
     Comma-separated list of enabled Markdown extensions. See this
@@ -107,8 +110,8 @@ steps:
     ID of user on homeserver to send message as (ID, not username).
 
 
-[`DEFAULT_ALLOWED_ATTRS`]: ./matrixchat-notify.py#L29
-[`DEFAULT_ALLOWED_TAGS`]: ./matrixchat-notify.py#L35
+[`DEFAULT_ALLOWED_ATTRS`]: ./matrixchat-notify.py#L27
+[`DEFAULT_ALLOWED_TAGS`]: ./matrixchat-notify.py#L34
 [allowed attributes]: https://bleach.readthedocs.io/en/latest/clean.html#allowed-attributes-attributes
 [drone.io]: https://drone.io/
 [list of extensions]: https://python-markdown.github.io/extensions/

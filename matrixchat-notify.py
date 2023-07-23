@@ -20,36 +20,47 @@ from distutils.util import strtobool
 from os.path import exists
 from string import Template
 
-import bleach
 from nio import AsyncClient, LoginResponse
 
 PROG = "matrixchat-notify"
 CONFIG_FILENAME = f"{PROG}-config.json"
-DEFAULT_ALLOWED_ATTRS = bleach.ALLOWED_ATTRIBUTES.copy()
-DEFAULT_ALLOWED_ATTRS.update(
-    {
-        "*": ["class"],
-        "img": ["alt", "src"],
-    }
-)
-DEFAULT_ALLOWED_TAGS = bleach.ALLOWED_TAGS | {
+DEFAULT_ALLOWED_ATTRS = {
+    "*": ["class"],
+    "a": ["href", "title"],
+    "abbr": ["title"],
+    "acronym": ["title"],
+    "img": ["alt", "src"],
+}
+DEFAULT_ALLOWED_TAGS = {
+    "a",
+    "abbr",
+    "acronym",
+    "b",
+    "blockquote",
+    "code",
     "dd",
     "div",
     "dl",
     "dt",
+    "em",
     "h1",
     "h2",
     "h3",
     "h4",
     "h5",
     "h6",
+    "i",
+    "li",
+    "ol",
     "p",
     "span",
+    "strong",
     "table",
     "td",
     "th",
     "thead",
     "tr",
+    "ul",
 }
 DEFAULT_HOMESERVER = "https://matrix.org"
 DEFAULT_MARKDOWN_EXTENSIONS = "admonition, extra, sane_lists, smarty"
@@ -171,6 +182,7 @@ def render_message(config):
 
 
 def render_markdown(message, config):
+    import bleach
     import markdown
 
     allowed_attrs = config.get("allowed_attrs", DEFAULT_ALLOWED_ATTRS)
