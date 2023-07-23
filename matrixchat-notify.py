@@ -141,9 +141,7 @@ def main(args=None):
     args = ap.parse_args(args)
 
     logging.basicConfig(
-        level=getattr(
-            logging, "DEBUG" if args.verbose else os.environ.get("PLUGIN_LOG_LEVEL", "INFO")
-        ),
+        level="DEBUG" if args.verbose else os.environ.get("PLUGIN_LOG_LEVEL", "INFO").upper(),
         format=os.environ.get("PLUGIN_LOG_FORMAT", "%(levelname)s: %(message)s"),
     )
 
