@@ -10,6 +10,7 @@ Requires:
 
 import argparse
 import asyncio
+import fnmatch
 import json
 import logging
 import os
@@ -22,14 +23,16 @@ from nio import AsyncClient, LoginResponse
 
 PROG = "matrixchat-notify"
 CONFIG_FILENAME = f"{PROG}-config.json"
-DEFAULT_TEMPLATE = "${DRONE_BUILD_STATUS}"
 DEFAULT_HOMESERVER = "https://matrix.org"
+DEFAULT_PASS_ENVIRONMENT = ["DRONE_*"]
+DEFAULT_TEMPLATE = "${DRONE_BUILD_STATUS}"
 SETTINGS_KEYS = (
     "accesstoken",
     "deviceid",
     "devicename",
     "homeserver",
     "markdown",
+    "pass_environment",
     "password",
     "roomid",
     "template",
@@ -110,6 +113,38 @@ async def send_notification(config, message):
     await client.close()
 
 
+def render_message(config):
+    pass_environment = config.get("pass_environment", "")
+
+    if not isinstance(pass_environment, list):
+        pass_environment = [pass_environment]
+
+    patterns = []
+    for value in pass_environment:
+        # expand any comma-separetd names/patterns
+        if "," in value:
+            patterns.extend([p.strip() for p in value.split(",") if p.strip()])
+        else:
+            patterns.append(value)
+
+    env_names = tuple(os.environ)
+    filtered_names = set()
+
+    for pattern in patterns:
+        filtered_names.update(fnmatch.filter(env_names, pattern))
+
+    context = {name: os.environ[name] for name in tuple(filtered_names)}
+    template = config.get("template", DEFAULT_TEMPLATE)
+    return Template(template).safe_substitute(context)
+
+
+def render_markdown(message):
+    import markdown
+
+    formatted = markdown.markdown(message)
+    return {"formatted_body": formatted, "body": message, "format": "org.matrix.custom.html"}
+
+
 def main(args=None):
     ap = argparse.ArgumentParser(prog=PROG, description=__doc__.splitlines()[0])
     ap.add_argument(
@@ -124,6 +159,17 @@ def main(args=None):
         "--dry-run",
         action="store_true",
         help="Don't send notification message, only print it.",
+    )
+    ap.add_argument(
+        "-e",
+        "--pass-environment",
+        nargs="*",
+        help=(
+            "Comma-separated white-list of environment variable names or name patterns. Only "
+            "environment variables matching any of  the given names or patterns will be available "
+            "as valid placeholders in the message template. "
+            "Accepts shell glob patterns and may be passed more than once (default: 'DRONE_*')."
+        ),
     )
     ap.add_argument(
         "-m",
@@ -150,23 +196,22 @@ def main(args=None):
     except Exception as exc:
         return f"Could not parse configuration: {exc}"
 
-    template = config.get("template", DEFAULT_TEMPLATE)
-    message = Template(template).safe_substitute(os.environ)
+    if args.pass_environment is not None:
+        # Security feature: if any environment names/patterns are passed via -e|--pass-environment
+        # options, they completely replace any given via the config or environment.
+        config["pass_environment"] = args.pass_environment
+
+    if "pass_environment" not in config:
+        config["pass_environment"] = DEFAULT_PASS_ENVIRONMENT
+
+    message = render_message(config)
 
     if tobool(config.get("markdown")) or args.render_markdown:
         log.debug("Rendering markdown message to HTML.")
         try:
-            import markdown
-
-            formatted = markdown.markdown(message)
+            message = render_markdown(message)
         except:  ## noqa
             log.exception("Failed to render message with markdown.")
-            return 1
-
-        body = message
-        message = {"formatted_body": formatted}
-        message["body"] = body
-        message["format"] = "org.matrix.custom.html"
 
     if not args.dry_run:
         if not config.get("userid"):

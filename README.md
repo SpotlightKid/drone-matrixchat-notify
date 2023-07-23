@@ -52,6 +52,14 @@ steps:
     substtution is considered to be in Markdown format and will be rendered to
     HTML and sent as a formatted message with `org.matrix.custom.html` format.
 
+* `pass_environment` *(default:* `DRONE_*`*)*
+
+    Comma-separated white-list of environment variable names or name patterns.
+    Patterns are shell-glob style patterns and case-sensitive.
+
+    Only environment variables matching any of the given names or patterns will
+    be available as valid placeholders in the message template.
+
 * `password`
 
     Password to use for authenticating the user set with `userid`. Either a
@@ -64,7 +72,8 @@ steps:
 * `template` *(default:* `${DRONE_BUILD_STATUS}`*)*
 
     The message template. Valid placeholders of the form `${PLACEHOLDER}` will
-    be substituted with the values of the matching environment variables.
+    be substituted with the values of the matching environment variables
+    (subject to filtering according to the `pass_environment` setting).
 
     See this [reference] for environment variables available in drone.io CI
     pipelines.
