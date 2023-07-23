@@ -1,5 +1,5 @@
 FROM python:3.11-alpine
-RUN python3 -m pip --no-cache-dir install markdown matrix-nio
+RUN python3 -m pip --no-cache-dir install bleach markdown matrix-nio
 ADD matrixchat-notify.py /bin/
 ADD matrixchat-notify-config.json /etc/
 RUN chmod +x /bin/matrixchat-notify.py

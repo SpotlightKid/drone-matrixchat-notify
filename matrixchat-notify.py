@@ -3,7 +3,8 @@
 
 Requires:
 
-* <https://github.com/poljar/matrix-nio>
+* <https://pypi.org/project/matrix-nio>
+* Optional: <https://pypi.org/project/bleach/>
 * Optional: <https://pypi.org/project/markdown/>
 
 """
@@ -19,19 +20,50 @@ from distutils.util import strtobool
 from os.path import exists
 from string import Template
 
+import bleach
 from nio import AsyncClient, LoginResponse
 
 PROG = "matrixchat-notify"
 CONFIG_FILENAME = f"{PROG}-config.json"
+DEFAULT_ALLOWED_ATTRS = bleach.ALLOWED_ATTRIBUTES.copy()
+DEFAULT_ALLOWED_ATTRS.update(
+    {
+        "*": ["class"],
+        "img": ["alt", "src"],
+    }
+)
+DEFAULT_ALLOWED_TAGS = bleach.ALLOWED_TAGS | {
+    "dd",
+    "div",
+    "dl",
+    "dt",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "p",
+    "span",
+    "table",
+    "td",
+    "th",
+    "thead",
+    "tr",
+}
 DEFAULT_HOMESERVER = "https://matrix.org"
+DEFAULT_MARKDOWN_EXTENSIONS = "admonition, extra, sane_lists, smarty"
 DEFAULT_PASS_ENVIRONMENT = ["DRONE_*"]
 DEFAULT_TEMPLATE = "${DRONE_BUILD_STATUS}"
 SETTINGS_KEYS = (
+    "allowed_tags",
+    "allowed_attrs",
     "accesstoken",
     "deviceid",
     "devicename",
     "homeserver",
     "markdown",
+    "markdown_extensions",
     "pass_environment",
     "password",
     "roomid",
@@ -138,11 +170,35 @@ def render_message(config):
     return Template(template).safe_substitute(context)
 
 
-def render_markdown(message):
+def render_markdown(message, config):
     import markdown
 
-    formatted = markdown.markdown(message)
-    return {"formatted_body": formatted, "body": message, "format": "org.matrix.custom.html"}
+    allowed_attrs = config.get("allowed_attrs", DEFAULT_ALLOWED_ATTRS)
+    allowed_tags = config.get("allowed_tags", DEFAULT_ALLOWED_TAGS)
+    extensions = config.get("markdown_extensions", DEFAULT_MARKDOWN_EXTENSIONS)
+
+    if isinstance(allowed_attrs, str):
+        allowed_attrs = [attr.strip() for attr in allowed_attrs.split(",") if attr.strip()]
+
+    if isinstance(allowed_tags, str):
+        allowed_tags = [tag.strip() for tag in allowed_tags.split(",") if tag.strip()]
+
+    if isinstance(extensions, str):
+        extensions = [ext.strip() for ext in extensions.split(",") if ext.strip()]
+
+    try:
+        md = markdown.Markdown(extensions=extensions)
+    except (AttributeError, ImportError, TypeError) as exc:
+        log.error("Could not instantiate Markdown formatter: %s", exc)
+        return message
+
+    return {
+        "formatted_body": bleach.clean(
+            md.convert(message), tags=allowed_tags, attributes=allowed_attrs, strip=True
+        ),
+        "body": message,
+        "format": "org.matrix.custom.html",
+    }
 
 
 def main(args=None):
@@ -209,7 +265,7 @@ def main(args=None):
     if tobool(config.get("markdown")) or args.render_markdown:
         log.debug("Rendering markdown message to HTML.")
         try:
-            message = render_markdown(message)
+            message = render_markdown(message, config)
         except:  ## noqa
             log.exception("Failed to render message with markdown.")
 
