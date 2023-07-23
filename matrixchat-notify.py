@@ -5,6 +5,7 @@ Requires:
 
 * <https://pypi.org/project/matrix-nio>
 * Optional: <https://pypi.org/project/bleach/>
+* Optional: <https://pypi.org/project/Jinja2/>
 * Optional: <https://pypi.org/project/markdown/>
 
 """
@@ -73,6 +74,7 @@ SETTINGS_KEYS = (
     "deviceid",
     "devicename",
     "homeserver",
+    "jinja",
     "markdown",
     "markdown_extensions",
     "pass_environment",
@@ -86,7 +88,7 @@ log = logging.getLogger(PROG)
 
 def tobool(s):
     try:
-        return strtobool(s)
+        return strtobool(str(s))
     except ValueError:
         return False
 
@@ -156,15 +158,15 @@ async def send_notification(config, message):
     await client.close()
 
 
-def render_message(config):
-    pass_environment = config.get("pass_environment", "")
+def get_template_context(config):
+    pass_environment = config.get("pass_environment", [])
 
     if not isinstance(pass_environment, list):
         pass_environment = [pass_environment]
 
     patterns = []
     for value in pass_environment:
-        # expand any comma-separetd names/patterns
+        # expand any comma-separated names/patterns
         if "," in value:
             patterns.extend([p.strip() for p in value.split(",") if p.strip()])
         else:
@@ -176,9 +178,24 @@ def render_message(config):
     for pattern in patterns:
         filtered_names.update(fnmatch.filter(env_names, pattern))
 
-    context = {name: os.environ[name] for name in tuple(filtered_names)}
+    return {name: os.environ[name] for name in tuple(filtered_names)}
+
+
+def render_message(config):
+    context = get_template_context(config)
     template = config.get("template", DEFAULT_TEMPLATE)
-    return Template(template).safe_substitute(context)
+
+    if tobool(config.get("jinja")):
+        try:
+            from jinja2.sandbox import SandboxedEnvironment
+
+            env = SandboxedEnvironment()
+            return env.from_string(template).render(context)
+        except Exception as exc:
+            log.error("Could not render Jinja2 template: %s", exc)
+            return template
+    else:
+        return Template(template).safe_substitute(context)
 
 
 def render_markdown(message, config):
