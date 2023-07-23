@@ -29,6 +29,14 @@ steps:
 
 ## Configuration settings
 
+
+* `allowed_attrs` *(default:* [`DEFAULT_ALLOWED_ATTRS`]*)*
+
+    List or string with comma-separated list of HTML attribute names or
+    dict mapping tag names to lists of attributes names.
+
+    See the bleach documentation on [allowed attributes] for more information.
+
 * `allowed_tags` *(default:* [`DEFAULT_ALLOWED_TAGS`]*)*
 
     List or set or string with comma-separated list of HTML tag names. HTML
@@ -38,13 +46,6 @@ steps:
     Note that the default list does not include any tags, which allow to load
     external resources when the generated HTML is displayed, notably `img`
     is not included.
-
-* `allowed_attrs` *(default:* [`DEFAULT_ALLOWED_ATTRS`]*)*
-
-    List or string with comma-separated list of HTML attribute names or
-    dict mapping tag names to lists of attributes names.
-
-    See the bleach documentation on [allowed attributes] for more information.
 
 * `accesstoken`
 
