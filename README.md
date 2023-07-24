@@ -31,11 +31,36 @@ steps:
     userid: '@drone-bot@matrix.org'
     password:
       from_secret: drone-bot-pw
-    template: '${DRONE_REPO} ${DRONE_COMMIT_SHA} ${DRONE_BUILD_STATUS}'
+    markdown: 'yes'
+    template: |
+      `${DRONE_REPO}` build #${DRONE_BUILD_NUMBER} status: **${DRONE_BUILD_STATUS}**
+
+      ${DRONE_PULL_REQUEST_TITLE}](${DRONE_COMMIT_LINK})
 ```
 
 ## Configuration settings
 
+### Required
+
+* `roomid` *(required)*
+
+    ID of matrix chat room to send messages to (ID, not alias).
+
+* `userid` *(required)*
+
+    Matrix user ID on homeserver to send message as (ID, not username).
+
+* `password` *(required)*
+
+    Password to use for authenticating the user set with `userid`. Either a
+    password or an access token is required.
+
+* `accesstoken` *(required)*
+
+    Access token to use for authentication instead of `password`. Either an
+    access token or a password is required.
+
+### Optional
 
 * `allowed_attrs` *(default:* [`DEFAULT_ALLOWED_ATTRS`]*)*
 
@@ -53,11 +78,6 @@ steps:
     Note that the default list does not include any tags, which allow to load
     external resources when the generated HTML is displayed, notably `img`
     is not included.
-
-* `accesstoken`
-
-    Access token to use for authentication instead of `password`. Either an
-    access token or a password is required.
 
 * `deviceid`
 
@@ -108,15 +128,6 @@ steps:
     Only environment variables matching any of the given names or patterns will
     be available as valid placeholders in the message template.
 
-* `password`
-
-    Password to use for authenticating the user set with `userid`. Either a
-    password or an access token is required.
-
-* `roomid` *(required)*
-
-    ID of matrix chat room to send messages to (ID, not alias).
-
 * `template` *(default:* `${DRONE_BUILD_STATUS}`*)*
 
     The message template. Valid placeholders (example: `${DRONE_REPO}`) will be
@@ -126,9 +137,6 @@ steps:
     See this [reference] for environment variables available in drone.io CI
     pipelines.
 
-* `userid` *(required)*
-
-    ID of user on homeserver to send message as (ID, not username).
 
 
 [`DEFAULT_ALLOWED_ATTRS`]: https://github.com/SpotlightKid/drone-matrixchat-notify/blob/master/matrixchat-notify.py#L28
