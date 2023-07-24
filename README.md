@@ -1,7 +1,14 @@
 # drone-matrixchat-notify
 
-A [drone.io] [plugin] to send notifications to Matrix chat rooms from
-CI pipeline steps.
+[![MIT License](https://img.shields.io/github/license/SpotlightKid/drone-matrixchat-notify?label=License)](https://github.com/SpotlightKid/drone-matrixchat-notify/blob/master/LICENSE)
+[![GitHub tag (with filter)](https://img.shields.io/github/v/tag/SpotlightKid/drone-matrixchat-notify?filter=v*.*.*&logo=github&label=Latest%20version)](https://github.com/SpotlightKid/drone-matrixchat-notify/tags)
+[![Docker image version](https://img.shields.io/docker/v/spotlightkid/drone-matrixchat-notify?logo=docker&label=Docker+image)](https://hub.docker.com/r/spotlightkid/drone-matrixchat-notify)
+[![GitHub stars](https://img.shields.io/github/stars/SpotlightKid/drone-matrixchat-notify?logo=github&label=GitHub)](https://github.com/SpotlightKid/drone-matrixchat-notify)
+[![GitLab stars](https://img.shields.io/gitlab/stars/SpotlightKid%2Fdrone-matrixchat-notify?logo=gitlab&label=GitLab)](https://gitlab.com/SpotlightKid/drone-matrixchat-notify)
+[![GitHub issues](https://img.shields.io/github/issues/SpotlightKid/drone-matrixchat-notify?logo=github&label=Issues)](https://github.com/SpotlightKid/drone-matrixchat-notify/issues)
+
+A [drone.io] [plugin] to send notifications to Matrix chat rooms from CIs
+pipeline steps. Supports *Jinja* message templates and *Markdown* rendering.
 
 Example pipeline configuration:
 
@@ -71,7 +78,7 @@ steps:
     placeholder substitution). The template context is controlled by the
     `pass_environment` setting, same as with non-Jinja templates, but
     placeholders use a different syntax (example: `{{DRONE_REPO}}`), so the
-    `template` setting should be changed to be a valid Jinja2 template string
+    `template` setting should be changed to be a valid Jinja template string
     when this is enabled.
 
     Using this feature requires the `jinja2` Python module to be available
@@ -124,8 +131,8 @@ steps:
     ID of user on homeserver to send message as (ID, not username).
 
 
-[`DEFAULT_ALLOWED_ATTRS`]: ./matrixchat-notify.py#L27
-[`DEFAULT_ALLOWED_TAGS`]: ./matrixchat-notify.py#L34
+[`DEFAULT_ALLOWED_ATTRS`]: https://github.com/SpotlightKid/drone-matrixchat-notify/blob/master/matrixchat-notify.py#L28
+[`DEFAULT_ALLOWED_TAGS`]: https://github.com/SpotlightKid/drone-matrixchat-notify/blob/master/matrixchat-notify.py#L35
 [allowed attributes]: https://bleach.readthedocs.io/en/latest/clean.html#allowed-attributes-attributes
 [drone.io]: https://drone.io/
 [jinja]: https://jinja.palletsprojects.com/
