@@ -7,7 +7,7 @@
 [![GitLab stars](https://img.shields.io/gitlab/stars/SpotlightKid%2Fdrone-matrixchat-notify?logo=gitlab&label=GitLab)](https://gitlab.com/SpotlightKid/drone-matrixchat-notify)
 [![GitHub issues](https://img.shields.io/github/issues/SpotlightKid/drone-matrixchat-notify?logo=github&label=Issues)](https://github.com/SpotlightKid/drone-matrixchat-notify/issues)
 
-A [drone.io] [plugin] to send notifications to Matrix chat rooms from CIs
+A [drone.io] [plugin] to send notifications to Matrix chat rooms from CI
 pipeline steps. Supports *Jinja* message templates and *Markdown* rendering.
 
 Example pipeline configuration:
